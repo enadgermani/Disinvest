@@ -39,13 +39,18 @@
         ];
 
         /* ---------- 2.  FULL JSON DB ---------- */
-        let db = [];
 
-        fetch('db_etf_name_ticker.json')
-            .then(r => r.json())
-            .then(j => { db = j; })
-            .catch(console.error);
+       let db = [];  // initialize empty array globally or in your module
 
+fetch('db_etf_name_ticker.json')
+  .then(r => r.json())
+  .then(j => {
+    db = j;
+    console.log(db);
+    console.log('ETF DB loaded:', db.length, 'items');
+  })
+  .catch(console.error);
+  db = db.filter(e => e.symbol && e.name);
         /* ---------- 3.  DOM UTILS ---------- */
         const search = document.getElementById('search');
         const suggBox = document.getElementById('suggestions');
@@ -60,15 +65,20 @@
                 suggBox.appendChild(li);
             });
         }
-        search.addEventListener('input', () => {
-            const q = search.value.trim().toUpperCase();
-            if (!q) { showSuggestions(HOT); return; }
-            const pool = [...HOT, ...db];
-            const filtered = pool.filter(e =>
-                e.symbol.toUpperCase().startsWith(q) || e.name.toUpperCase().includes(q)
-            ).filter((v, i, a) => a.findIndex(x => x.symbol === v.symbol) === i);
-            showSuggestions(filtered);
-        });
+      search.addEventListener('input', () => {
+    const q = search.value.trim().toUpperCase();
+    if (!q) {
+        showSuggestions(HOT);
+        return;
+    }
+    const pool = [...HOT, ...db];
+    const filtered = pool.filter(e =>
+        (e.symbol && e.symbol.toUpperCase().startsWith(q)) ||
+        (e.name && e.name.toUpperCase().includes(q))
+    ).filter((v, i, a) => a.findIndex(x => x.symbol === v.symbol) === i);
+
+    showSuggestions(filtered);
+});
         async function pick(etf) {
             search.value = etf.symbol;
             suggBox.innerHTML = '';
