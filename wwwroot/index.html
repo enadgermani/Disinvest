@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Disinvest from Genocide – Local Edition</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="style.css" rel="stylesheet" />
+</head>
+<body>
+    <main>
+        <h1>Disinvest&nbsp;from&nbsp;Genocide</h1>
+        <p class="subtitle">Instant ETF screening – completely offline</p>
+
+        <div class="search-wrapper">
+            <input id="search" placeholder="Type ETF ticker or name…" autocomplete="off" type="search" />
+            <ul id="suggestions" class="typeahead"></ul>
+        </div>
+
+        <div id="results"></div>
+    </main>
+
+    <script>
+        /* ---------- 1.  HOT-START LIST ---------- */
+        const HOT = [
+            { symbol: "SPY", name: "S&P 500 SPDR" },
+            { symbol: "QQQ", name: "Nasdaq QQQ Invesco ETF" },
+            { symbol: "ONEQ", name: "Nasdaq Composite ETF" },
+            { symbol: "DIA", name: "Dow Industrials SPDR" },
+            { symbol: "IWM", name: "Russell 2000 Ishares ETF" },
+            { symbol: "EFA", name: "EAFE Ishares MSCI ETF" },
+            { symbol: "VGK", name: "Europe ETF FTSE Vanguard" },
+            { symbol: "EWG", name: "Germany Ishares MSCI ETF" },
+            { symbol: "EWU", name: "UK Ishares MSCI ETF" },
+            { symbol: "EPP", name: "Pacific Ex Japan Ishares MSCI ETF" },
+            { symbol: "EWJ", name: "Japan Ishares MSCI ETF" },
+            { symbol: "EWY", name: "South Korea Ishares MSCI ETF" },
+            { symbol: "EWT", name: "Taiwan Ishares MSCI ETF" }
+        ];
+
+        /* ---------- 2.  FULL JSON DB ---------- */
+        let db = [];
+
+        fetch('db_etf_name_ticker.json')
+            .then(r => r.json())
+            .then(j => { db = j; })
+            .catch(console.error);
+
+        /* ---------- 3.  DOM UTILS ---------- */
+        const search = document.getElementById('search');
+        const suggBox = document.getElementById('suggestions');
+        const resBox = document.getElementById('results');
+
+        function showSuggestions(arr) {
+            suggBox.innerHTML = '';
+            arr.slice(0, 8).forEach(e => {
+                const li = document.createElement('li');
+                li.innerHTML = `<a href="#">${e.symbol} – ${e.name}</a>`;
+                li.onclick = ev => { ev.preventDefault(); pick(e); };
+                suggBox.appendChild(li);
+            });
+        }
+        search.addEventListener('input', () => {
+            const q = search.value.trim().toUpperCase();
+            if (!q) { showSuggestions(HOT); return; }
+            const pool = [...HOT, ...db];
+            const filtered = pool.filter(e =>
+                e.symbol.toUpperCase().startsWith(q) || e.name.toUpperCase().includes(q)
+            ).filter((v, i, a) => a.findIndex(x => x.symbol === v.symbol) === i);
+            showSuggestions(filtered);
+        });
+        async function pick(etf) {
+            search.value = etf.symbol;
+            suggBox.innerHTML = '';
+
+            try {
+                const r = await fetch(`${API}/${encodeURIComponent(etf.symbol)}`);
+                if (!r.ok) throw new Error('Not found');
+                render(await r.json());
+            } catch (err) {
+                resBox.innerHTML = `
+                    <div class="etf-card">
+                          <h2>${etf.symbol}</h2>
+                          <p>${etf.name}</p>
+                          <small>Category: ${etf.category || '—'}</small>
+                          <br><br>
+                          <em style="opacity:.6">Offline data. Re-enable API to show genocide-screening results.</em>
+                    </div>`;
+            }
+
+
+        }
+        /* ---------- 4.  show hot list on load ---------- */
+        showSuggestions(HOT);
+
+        /* ---------- 5.  USE EXTERNAL API ---------- */
+
+        const API = 'https://localhost:7051/api/Etf';
+        function render(d) {
+            const card = document.createElement('div');
+            card.className = 'etf-card';
+            card.innerHTML = `
+            <h2>${d.ticker}</h2>
+            <p>${d.etfName}</p>
+            <small>Analysis date: ${new Date(d.analysisDate).toLocaleDateString()}</small>
+            ${section('Fossil Fuels', d.fossilFuelsPercentage, d.fossilFuelsHoldings)}
+            ${section('Weapons', d.weaponsPercentage, d.weaponsHoldings)}
+            ${section('Gaza List', d.gazaListPercentage, d.gazaListHoldings)}`;
+            resBox.replaceChildren(card);
+        }
+        function section(title, pct, list) {
+            if (!pct) return '';
+            return `<details class="section" open>
+                    <summary>${title} – ${pct}%</summary>
+                    <ul>${list.map(h => `<li>${h}</li>`).join('')}</ul>
+                  </details>`;
+        }
+    </script>
+</body>
+</html>
