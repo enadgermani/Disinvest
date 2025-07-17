@@ -112,7 +112,6 @@ fetch('db_etf_name_ticker.json')
             card.innerHTML = `
             <h2>${d.ticker}</h2>
             <p>${d.etfName}</p>
-            <small>Analysis date: ${new Date(d.analysisDate).toLocaleDateString()}</small>
             ${section('Fossil Fuels', d.fossilFuelsPercentage, d.fossilFuelsHoldings)}
             ${section('Weapons', d.weaponsPercentage, d.weaponsHoldings)}
             ${section('Gaza List', d.gazaListPercentage, d.gazaListHoldings)}`;
