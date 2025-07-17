@@ -79,10 +79,11 @@ fetch('db_etf_name_ticker.json')
 
     showSuggestions(filtered);
 });
+let etfname;
         async function pick(etf) {
             search.value = etf.symbol;
             suggBox.innerHTML = '';
-
+            etfname = etf.name;
             try {
                 const r = await fetch(`${API}/${encodeURIComponent(etf.symbol)}`);
                 if (!r.ok) throw new Error('Not found');
@@ -111,7 +112,7 @@ fetch('db_etf_name_ticker.json')
             card.className = 'etf-card';
             card.innerHTML = `
             <h2>${d.Ticker}</h2>
-            <p>${etf.name}</p>
+            <p>${etfname}</p>
             ${section('Fossil Fuels', d.FossilFuelsPercentage, d.FossilFuelsHoldings)}
             ${section('Weapons', d.WeaponsPercentage, d.wWaponsHoldings)}
             ${section('Gaza List', d.GazaListPercentage, d.GazaListHoldings)}`;
