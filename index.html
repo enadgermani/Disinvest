@@ -111,7 +111,7 @@ fetch('db_etf_name_ticker.json')
             card.className = 'etf-card';
             card.innerHTML = `
             <h2>${d.Ticker}</h2>
-            <p>${d.EtfName}</p>
+            <p>${etf.EtfName}</p>
             ${section('Fossil Fuels', d.FossilFuelsPercentage, d.FossilFuelsHoldings)}
             ${section('Weapons', d.WeaponsPercentage, d.wWaponsHoldings)}
             ${section('Gaza List', d.GazaListPercentage, d.GazaListHoldings)}`;
