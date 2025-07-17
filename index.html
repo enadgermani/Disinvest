@@ -110,11 +110,11 @@ fetch('db_etf_name_ticker.json')
             const card = document.createElement('div');
             card.className = 'etf-card';
             card.innerHTML = `
-            <h2>${d.ticker}</h2>
-            <p>${d.etfName}</p>
-            ${section('Fossil Fuels', d.fossilFuelsPercentage, d.fossilFuelsHoldings)}
-            ${section('Weapons', d.weaponsPercentage, d.weaponsHoldings)}
-            ${section('Gaza List', d.gazaListPercentage, d.gazaListHoldings)}`;
+            <h2>${d.Ticker}</h2>
+            <p>${d.EtfName}</p>
+            ${section('Fossil Fuels', d.FossilFuelsPercentage, d.FossilFuelsHoldings)}
+            ${section('Weapons', d.WeaponsPercentage, d.wWaponsHoldings)}
+            ${section('Gaza List', d.GazaListPercentage, d.GazaListHoldings)}`;
             resBox.replaceChildren(card);
         }
         function section(title, pct, list) {
